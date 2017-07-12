@@ -3,53 +3,53 @@ var debug = true;
 /*CALCULATOR LOGIC*/
 //Classes
 function Node() {
-  this.parent = null;
-  this.token = null;
+    this.parent = null;
+    this.token = null;
 }
 
-Node.prototype.setLeft = function(node) {
-  this.left = node;
-  if (node) node.parent = this;
+Node.prototype.setLeft = function (node) {
+    this.left = node;
+    if (node) node.parent = this;
 };
 
-Node.prototype.setRight = function(node) {
-  this.right = node;
-  if (node) node.parent = this;  
+Node.prototype.setRight = function (node) {
+    this.right = node;
+    if (node) node.parent = this;
 };
 
-Node.prototype.toString = function() {
+Node.prototype.toString = function () {
     if (this === null) return "null";
     return this.parent + " -> " + this.token;
-  };
+};
 
 function Operand(token) {
-  Node.call(this);
+    Node.call(this);
 
-  this.token = token;
-  this.value = Number(token);
+    this.token = token;
+    this.value = Number(token);
 }
 
 Operand.prototype = Object.create(Node.prototype);
 Operand.prototype.constructor = Operand;
 
 var operatorMap = {
-  "=": 0,
-  "+": 1,
-  "-": 1,
-  "*": 2,
-  "/": 2
+    "=": 0,
+    "+": 1,
+    "-": 1,
+    "*": 2,
+    "/": 2
 };
 
 function Operator(opToken) {
-  //debugger;
-  Node.call(this);
+    //debugger;
+    Node.call(this);
 
-  if (!operatorMap[opToken]) {
-    return false;
-  }
-  this.operation = new Function("a", "b", "return a " + opToken + " b;");
-  this.token = opToken;
-  this.precedence = operatorMap[opToken];
+    if (!operatorMap[opToken]) {
+        return false;
+    }
+    this.operation = new Function("a", "b", "return a " + opToken + " b;");
+    this.token = opToken;
+    this.precedence = operatorMap[opToken];
 }
 
 Operator.prototype = Object.create(Node.prototype);
@@ -61,290 +61,290 @@ var curr = null;
 var numToken = "";
 
 function parseDigit(digit) {
-  numToken += digit;
-  return numToken;
+    numToken += digit;
+    return numToken;
 }
 
 function parseOperator(opToken) {
-  if (numToken === "") return false;
-  var num = new Operand(numToken);
-  var op = new Operator(opToken);
-  if (!op) return false;
-  clearNumToken();
-  if (debug) console.log(num.token, op.token);
+    if (numToken === "") return false;
+    var num = new Operand(numToken);
+    var op = new Operator(opToken);
+    if (!op) return false;
+    clearNumToken();
+    if (debug) console.log(num.token, op.token);
 
-  if (root === null) {
-    curr = op;
-    op.setLeft(num);
-    root = op;
-  } else {
-    //debugger;
-    if (curr.precedence < op.precedence) {
-      curr.setRight(op);
-      op.setLeft(num);
-      curr = op;
-    } else {
-      //debugger;
-      curr.setRight(num);
-      if (curr.parent) {
-        curr.parent.setRight(op);
-      } else {
+    if (root === null) {
+        curr = op;
+        op.setLeft(num);
         root = op;
-      }
-      op.setLeft(curr);
-      curr = op;
+    } else {
+        //debugger;
+        if (curr.precedence < op.precedence) {
+            curr.setRight(op);
+            op.setLeft(num);
+            curr = op;
+        } else {
+            //debugger;
+            curr.setRight(num);
+            if (curr.parent) {
+                curr.parent.setRight(op);
+            } else {
+                root = op;
+            }
+            op.setLeft(curr);
+            curr = op;
+        }
     }
-  }
-  return op;
+    return op;
 }
 
 function parseExec() {
-  if (numToken === "") return false;
-  var num = new Operand(numToken);
-  curr.setRight(num);
-  return root;
+    if (numToken === "") return false;
+    var num = new Operand(numToken);
+    curr.setRight(num);
+    return root;
 }
 
 function parseString(input) {
-  if (debug) console.log("PARSE:");
-  resetAST();
-  for (var i = 0; i < input.length; i++) {
-    var c = input.charAt(i);
-    parseToken(c);
-  }
-  return root;
+    if (debug) console.log("PARSE:");
+    resetAST();
+    for (var i = 0; i < input.length; i++) {
+        var c = input.charAt(i);
+        parseToken(c);
+    }
+    return root;
 }
 
 function parseToken(c) {
-  if (c === "=") {
-    if (!isValidOperator() || root === null) return false;
-    updateHistory(numToken + "=");
-    parseExec();
-    var result = execAST(root);
-    updateHistory(result);
-    displayInput(result);
-    //if (debug) console.log("Result: ", result, ":", printAST(root));
-    resetAST(result);
-    if (debug) console.log("RESET: ", c, ":", numToken, ":", root);
-  } else if (c === "ce") {
-    clearEntry();
-  } else if (c === "ac") {
-    allClear();
-  } else if (operatorMap[c]) {
-    if (!isValidOperator()) return false;
-    updateHistory(numToken + c);
-    displayInput(c);
-    parseOperator(c);
-  } else {
-    if (root === null && !isHistoryClear()) {
-      clearHistory();
-      clearInput();
-      clearNumToken();
-    } else if (numToken === "") {
-      clearInput();
+    if (c === "=") {
+        if (!isValidOperator() || root === null) return false;
+        updateHistory(numToken + "=");
+        parseExec();
+        var result = execAST(root);
+        updateHistory(result);
+        displayInput(result);
+        //if (debug) console.log("Result: ", result, ":", printAST(root));
+        resetAST(result);
+        if (debug) console.log("RESET: ", c, ":", numToken, ":", root);
+    } else if (c === "ce") {
+        clearEntry();
+    } else if (c === "ac") {
+        allClear();
+    } else if (operatorMap[c]) {
+        if (!isValidOperator()) return false;
+        updateHistory(numToken + c);
+        displayInput(c);
+        parseOperator(c);
+    } else {
+        if (root === null && !isHistoryClear()) {
+            clearHistory();
+            clearInput();
+            clearNumToken();
+        } else if (numToken === "") {
+            clearInput();
+        }
+        updateInput(c);
+        parseDigit(c);
     }
-    updateInput(c);
-    parseDigit(c);
-  }
-  return true;
+    return true;
 }
 
 function clearEntry() {
-  //CE Button
-  if (debug) console.log("CE");
-  if (root === null) {
-    resetAST();
-    clearInput();
-    clearHistory();
-    clearNumToken();
-  } else if (numToken !== "") {
-    clearNumToken();
-    displayInput(curr.token);
-  } else {
-    if (curr.left instanceof Operand) {
-      numToken = curr.left.token;
-      if (debug) console.log("PARENT: ", curr);
-      if (curr.parent === null) {
-        resetAST(numToken);
-      } else {
-        curr = curr.parent;
-        if (debug) console.log("CURR: ", curr);
-        curr.setRight(null);
-      }
-    } else if (curr.left instanceof Operator) {
-      numToken = curr.left.left.token;
-      if (curr.parent) {
-        curr.parent.setRight(curr.left);
-        curr = curr.left;
-      } else {
-        resetAST(curr.left.token);
-      }
+    //CE Button
+    if (debug) console.log("CE");
+    if (root === null) {
+        resetAST();
+        clearInput();
+        clearHistory();
+        clearNumToken();
+    } else if (numToken !== "") {
+        clearNumToken();
+        displayInput(curr.token);
+    } else {
+        if (curr.left instanceof Operand) {
+            numToken = curr.left.token;
+            if (debug) console.log("PARENT: ", curr);
+            if (curr.parent === null) {
+                resetAST(numToken);
+            } else {
+                curr = curr.parent;
+                if (debug) console.log("CURR: ", curr);
+                curr.setRight(null);
+            }
+        } else if (curr.left instanceof Operator) {
+            numToken = curr.left.left.token;
+            if (curr.parent) {
+                curr.parent.setRight(curr.left);
+                curr = curr.left;
+            } else {
+                resetAST(curr.left.token);
+            }
+        }
+        displayInput(numToken);
+        displayHistory(printAST(root));
     }
-    displayInput(numToken);
-    displayHistory(printAST(root));
-  }
 }
 
 function allClear() {
-  resetAST();
+    resetAST();
     clearInput();
     clearHistory();
     clearNumToken();
 }
 
 function clearNumToken() {
-  numToken = "";
+    numToken = "";
 }
 
 function resetAST(chainValue) {
-  root = null;
-  curr = null;
-  parent = null;
-  gParent = null;
+    root = null;
+    curr = null;
+    parent = null;
+    gParent = null;
 
-  if (chainValue) {
-    numToken = chainValue;
-  } else {
-    numToken = null;
-  }
+    if (chainValue) {
+        numToken = chainValue;
+    } else {
+        numToken = null;
+    }
 }
 
 function isValidOperator() {
-  console.log("VaLidATE: " + numToken);
-  return numToken !== "";
+    console.log("VaLidATE: " + numToken);
+    return numToken !== "";
 }
 
 function printAST(node) {
-  if (node === null) {
-    if (debug) console.log("null");
-    return "";
-  }
-  var output = printAST(node.left, output);
-  output += " " + node.token;
-  output += printAST(node.right, output);
-  if (debug) console.log("return:", output, "token:", node.token);
-  return output;
+    if (node === null) {
+        if (debug) console.log("null");
+        return "";
+    }
+    var output = printAST(node.left, output);
+    output += " " + node.token;
+    output += printAST(node.right, output);
+    if (debug) console.log("return:", output, "token:", node.token);
+    return output;
 }
 
 function execAST(node) {
-  //debugger;
-  if (node instanceof Operand) {
-    if (debug) console.log("EXEC return: ", node.token);
-    return node.value;
-  }
-  if (debug) console.log(node.token, " -> LEFT");
-  var a = execAST(node.left);
-  if (debug) console.log(node.token, " -> RIGHT");
-  var b = execAST(node.right);
-  var c = node.operation(a, b);
-  if (debug) console.log("EXEC return:", a, node.token, b, "=", c);
-  return c;
+    //debugger;
+    if (node instanceof Operand) {
+        if (debug) console.log("EXEC return: ", node.token);
+        return node.value;
+    }
+    if (debug) console.log(node.token, " -> LEFT");
+    var a = execAST(node.left);
+    if (debug) console.log(node.token, " -> RIGHT");
+    var b = execAST(node.right);
+    var c = node.operation(a, b);
+    if (debug) console.log("EXEC return:", a, node.token, b, "=", c);
+    return c;
 }
 
 function printTest(output) {
-  $("#history").append("<div>" + output + "</div>");
+    $("#history").append("<div>" + output + "</div>");
 }
 
-$(document).ready(function() {
-  /*parseString("34+55=");
-  printTest(printAST(root));
-  printTest(execAST(root));
-  parseString("3+4*5=");
-  printTest(printAST(root));
-  printTest(execAST(root));*/
-  parseString("55+55*55-55.10=");
-  //updateHistory(printAST(root));
-  //updateHistory(execAST(root));
-  setListeners();
-  //$("#searchText").focus();
+$(document).ready(function () {
+    /*parseString("34+55=");
+    printTest(printAST(root));
+    printTest(execAST(root));
+    parseString("3+4*5=");
+    printTest(printAST(root));
+    printTest(execAST(root));*/
+    parseString("55+55*55-55.10=");
+    //updateHistory(printAST(root));
+    //updateHistory(execAST(root));
+    setListeners();
+    //$("#searchText").focus();
 });
 
 /* UI FUNCTIONS */
 function setListeners() {
-  $("button").click(function() {
-    var val = $(this).val();
-    parseToken(val);
-  });
+    $("button").click(function () {
+        var val = $(this).val();
+        parseToken(val);
+    });
 
-  $(document).keyup(function(event) {
-    keyNum = event.which;
-    if (event.shiftKey) {
-      //*Handle shift key first
-      switch (keyNum) {
-        case 56:
-          parseToken("*");
-          break;
-        case 187:
-          parseToken("+");
-      }
-    } else if (48 <= keyNum && keyNum <= 57) {
-      parseToken(keyNum - 48);
-    } else if (96 <= keyNum && keyNum <= 106) {
-      parseToken(keyNum - 96);
-    } else {
-      switch (keyNum) {
-        case 106:
-          parseToken("*");
-          break;
-        case 107:
-          parseToken("+");
-          break;
-        case 109:
-        case 189:
-          parseToken("-");
-          break;
-        case 110:
-        case 190:
-          parseToken(".");
-          break;
-        case 111:
-        case 191:
-          parseToken("/");
-          break;
-        case 13:
-        case 187:
-          parseToken("=");
-          break;
-        case 8:
-          parseToken("ce");
-          break;
-       case 27:
-          parseToken("ac");
-          break;   
-      }
-    }
-  });
+    $(document).keyup(function (event) {
+        keyNum = event.which;
+        if (event.shiftKey) {
+            //*Handle shift key first
+            switch (keyNum) {
+                case 56:
+                    parseToken("*");
+                    break;
+                case 187:
+                    parseToken("+");
+            }
+        } else if (48 <= keyNum && keyNum <= 57) {
+            parseToken(keyNum - 48);
+        } else if (96 <= keyNum && keyNum <= 106) {
+            parseToken(keyNum - 96);
+        } else {
+            switch (keyNum) {
+                case 106:
+                    parseToken("*");
+                    break;
+                case 107:
+                    parseToken("+");
+                    break;
+                case 109:
+                case 189:
+                    parseToken("-");
+                    break;
+                case 110:
+                case 190:
+                    parseToken(".");
+                    break;
+                case 111:
+                case 191:
+                    parseToken("/");
+                    break;
+                case 13:
+                case 187:
+                    parseToken("=");
+                    break;
+                case 8:
+                    parseToken("ce");
+                    break;
+                case 27:
+                    parseToken("ac");
+                    break;
+            }
+        }
+    });
 }
 
 function displayInput(token) {
-  $("#input").html(token);
+    $("#input").html(token);
 }
 
 function updateInput(token) {
-  var inputDiv = $("#input");
-  inputDiv.html(inputDiv.text() + token);
+    var inputDiv = $("#input");
+    inputDiv.html(inputDiv.text() + token);
 }
 
 function clearInput() {
-  var initial = "";
-  $("#input").html(initial);
+    var initial = "";
+    $("#input").html(initial);
 }
 
 function displayHistory(str) {
-  $("#history").html(str);
+    $("#history").html(str);
 }
 
 function updateHistory(token) {
-  var historyDiv = $("#history");
-  if (debug) console.log("UPDATE: ", token, ":", historyDiv.text());
-  if (root === null) clearHistory();
-  historyDiv.html(historyDiv.text() + token);
+    var historyDiv = $("#history");
+    if (debug) console.log("UPDATE: ", token, ":", historyDiv.text());
+    if (root === null) clearHistory();
+    historyDiv.html(historyDiv.text() + token);
 }
 
 function clearHistory() {
-  $("#history").html("");
+    $("#history").html("");
 }
 
 function isHistoryClear() {
-  return $("#history").html() === "";
+    return $("#history").html() === "";
 }
