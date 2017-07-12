@@ -15,8 +15,9 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
+      'https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js', //include jquery
       'js/**/*.js',
-      'test/**/*.js'
+      'test/**/*.js'      
     ],
 
 
