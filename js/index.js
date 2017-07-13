@@ -5,6 +5,8 @@ var debug = true;
 function Node() {
     this.parent = null;
     this.token = null;
+    this.left = null;
+    this.right = null;
 }
 
 Node.prototype.setLeft = function (node) {
@@ -44,12 +46,11 @@ function Operator(opToken) {
     //debugger;
     Node.call(this);
 
-    if (!operatorMap[opToken]) {
-        return false;
+    if (operatorMap[opToken]) {
+        this.operation = new Function("a", "b", "return a " + opToken + " b;");
+        this.token = opToken;
+        this.precedence = operatorMap[opToken];
     }
-    this.operation = new Function("a", "b", "return a " + opToken + " b;");
-    this.token = opToken;
-    this.precedence = operatorMap[opToken];
 }
 
 Operator.prototype = Object.create(Node.prototype);
@@ -60,6 +61,7 @@ var root = null;
 var curr = null;
 var numToken = "";
 
+/*No validation of input within function itself*/
 function parseDigit(digit) {
     numToken += digit;
     return numToken;
@@ -106,7 +108,7 @@ function parseExec() {
 }
 
 function parseString(input) {
-    if (debug) console.log("PARSE:");
+    if (debug) console.log("PARSE: " + input);
     resetAST();
     for (var i = 0; i < input.length; i++) {
         var c = input.charAt(i);
@@ -202,15 +204,15 @@ function resetAST(chainValue) {
     parent = null;
     gParent = null;
 
-    if (chainValue) {
+    if (chainValue !== undefined) {
         numToken = chainValue;
     } else {
-        numToken = null;
+        numToken = "";
     }
 }
 
 function isValidOperator() {
-    console.log("VaLidATE: " + numToken);
+    console.log("VALIDATE: " + numToken + " !== \"\"");
     return numToken !== "";
 }
 
@@ -220,7 +222,8 @@ function printAST(node) {
         return "";
     }
     var output = printAST(node.left, output);
-    output += " " + node.token;
+    //output += " " + node.token;
+    output += node.token;
     output += printAST(node.right, output);
     if (debug) console.log("return:", output, "token:", node.token);
     return output;
@@ -246,16 +249,16 @@ function printTest(output) {
 }
 
 $(document).ready(function () {
+    setListeners();
     /*parseString("34+55=");
     printTest(printAST(root));
     printTest(execAST(root));
     parseString("3+4*5=");
     printTest(printAST(root));
     printTest(execAST(root));*/
-    parseString("55+55*55-55.10=");
+    //parseString("55+55*55-55.10=");
     //updateHistory(printAST(root));
     //updateHistory(execAST(root));
-    setListeners();
     //$("#searchText").focus();
 });
 
@@ -346,5 +349,7 @@ function clearHistory() {
 }
 
 function isHistoryClear() {
-    return $("#history").html() === "";
+    var history = $("#history").html();
+    if (debug) console.log("isHistoryClear: " + history);
+    return  (history === "" || history === undefined);
 }
