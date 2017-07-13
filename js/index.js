@@ -205,7 +205,7 @@ function resetAST(chainValue) {
     gParent = null;
 
     if (chainValue !== undefined) {
-        numToken = chainValue;
+        numToken = chainValue.toString();
     } else {
         numToken = "";
     }

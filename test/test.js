@@ -127,4 +127,34 @@ describe('parseString', function () {
         var root = parseString("55+55*55-55.10");
         expect(printAST(root)).toEqual("55+55*55-");
     });
+    it('parseString("34-55");', function () {
+        console.log("Parse TEST");
+        var root = parseString("34-55");
+        expect(printAST(root)).toEqual("34-");
+    });
+    it('parseString("3+4*5");', function () {
+        console.log("Parse TEST");
+        var root = parseString("3+4*5");
+        expect(printAST(root)).toEqual("3+4*");
+    });
 });
+
+describe('execAST', function () {
+    it('parseString("55+55*55-55.10=");', function () {
+        console.log("Parse TEST");
+        var root = parseString("55+55*55-55.10=");
+        expect(numToken).toEqual("3024.9");
+    });
+    it('parseString("34-55=");', function () {
+        console.log("Parse TEST");
+        var root = parseString("34-55=");
+        expect(numToken).toEqual("-21");
+    });
+    it('parseString("3+4*5=");', function () {
+        console.log("Parse TEST");
+        var root = parseString("3+4*5=");
+        expect(numToken).toEqual("23");
+    });
+});
+
+
