@@ -113,13 +113,12 @@ describe('Division', function () {
 describe('parseDigit', function () {
     it('takes an input character and adds it to global numtoken', function () {
         parseDigit("3");
-        expect(numToken).toEqual("3");
+        expect(numToken.getValue()).toEqual("3");
         parseDigit(".");
         parseDigit("4");
-        expect(numToken).toEqual("3.4");
+        expect(numToken.getValue()).toEqual("3.4");
     });
 });
-
 
 describe('parseString', function () {
     it('parseString("55+55*55-55.10");', function () {
@@ -139,22 +138,84 @@ describe('parseString', function () {
     });
 });
 
-describe('execAST', function () {
-    it('parseString("55+55*55-55.10=");', function () {
+describe('parseString =', function () {
+    it('parseString(""55+55*55-55.10="");', function () {
         console.log("Parse TEST");
         var root = parseString("55+55*55-55.10=");
-        expect(numToken).toEqual("3024.9");
+        expect(numToken.getValue()).toEqual("3024.9");
     });
     it('parseString("34-55=");', function () {
         console.log("Parse TEST");
         var root = parseString("34-55=");
-        expect(numToken).toEqual("-21");
+        expect(numToken.getValue()).toEqual("-21");
     });
     it('parseString("3+4*5=");', function () {
         console.log("Parse TEST");
         var root = parseString("3+4*5=");
-        expect(numToken).toEqual("23");
+        expect(numToken.getValue()).toEqual("23");
     });
 });
 
+describe('parseString CE', function () {
+    it('parseString("<");', function () {
+        console.log("Parse TEST");
+        var root = parseString("<");
+        expect(numToken.getValue()).toEqual("");
+        expect(entryField.getValue()).toEqual("");
+        expect(historyField.getValue()).toEqual("");
+    });
+    it('parseString("3<");', function () {
+        console.log("Parse TEST");
+        var root = parseString("3<");
+        expect(numToken.getValue()).toEqual("");
+        expect(entryField.getValue()).toEqual("");
+        expect(historyField.getValue()).toEqual("");
+    });
+    it('parseString("3+<");', function () {
+        console.log("Parse TEST");
+        var root = parseString("3+<");
+        expect(root).toEqual(null);
+        expect(numToken.getValue()).toEqual("3");
+        expect(entryField.getValue()).toEqual("3");
+        expect(historyField.getValue()).toEqual("");
+    });
+    it('parseString("3+<<");', function () {
+        console.log("Parse TEST");
+        var root = parseString("3+<<");
+        expect(root).toEqual(null);
+        expect(numToken.getValue()).toEqual("");
+        expect(entryField.getValue()).toEqual("");
+        expect(historyField.getValue()).toEqual("");
+    });
+    it('parseString("34-55<");', function () {
+        console.log("Parse TEST");
+        var root = parseString("34-55<");
+        expect(historyField.getValue()).toEqual("34-");
+    });
+    it('parseString("3+4*<");', function () {
+        console.log("Parse TEST");
+        var root = parseString("3+4*<");
+        expect(numToken.getValue()).toEqual("4");
+        expect(historyField.getValue()).toEqual("3+");
+    });
+    it('parseString("3*4+<");', function () {
+        console.log("Parse TEST");
+        var root = parseString("3*4+<");
+        expect(numToken.getValue()).toEqual("4");
+        expect(historyField.getValue()).toEqual("3*");
+    });
+    it('parseString("6-4-4-<");', function () {
+        console.log("Parse TEST");
+        var root = parseString("6-4-4-<");
+        expect(numToken.getValue()).toEqual("4");
+        expect(historyField.getValue()).toEqual("6-4-");
+    });
+});
+
+describe('NumToken', function () {
+    it('isEmpty()', function () {
+        numToken.clear();
+        expect(numToken.isEmpty()).toEqual(true);
+    });
+});
 

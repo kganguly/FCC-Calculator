@@ -56,25 +56,154 @@ function Operator(opToken) {
 Operator.prototype = Object.create(Node.prototype);
 Operator.prototype.constructor = Operator;
 
+/*Global Singletons:
+    * NumToken: The number token waiting to be completed
+                when the next operator is enetered.
+    * Input: State of calculator input field.
+    * History: State of calculator history field.
+*/
+var NumToken = (function(){
+    function NumToken() {
+        this.token = "";
+        this.append = function(c) {
+            this.token += c;
+        };
+        this.getValue = function() {
+            return this.token;
+        };
+        this.setValue = function(newValue) {
+            this.token = newValue;
+        };
+        this.clear = function() {
+            this.token = "";
+        }
+        this.isEmpty = function() {
+            return (this.token === "")
+        }
+        
+    }
+    var instance;
+    return {
+        getInstance: function(){
+            if (instance === undefined) {
+                instance = new NumToken();
+                // Hide the constructor so the returned objected can't be new'd...
+                instance.constructor = null;
+            }
+            return instance;
+        }
+   };
+})();
+
+var EntryField = (function(){
+    function EntryField() {
+        this.value = "";
+        this.display = function(token) {
+            $("#input").html(this.value);
+        }        
+        this.set = function(token) {
+            this.value = token;
+            $("#input").html(this.value);
+            //this.display();
+        }
+        this.getValue = function() {
+            return this.value;
+        }
+        this.append = function(token) {
+            this.value += token;
+            $("#input").html(this.value);
+            //this.display();
+        }
+        this.clear = function() {
+            var initial = "";
+            this.value = initial;
+            $("#input").html(this.value);
+            //this.display();
+        }
+    }
+    var instance;
+    return {
+        getInstance: function(){
+            if (instance === undefined) {
+                instance = new EntryField();
+                // Hide the constructor so the returned objected can't be new'd...
+                instance.constructor = null;
+            }
+            return instance;
+        }
+   };
+})();
+
+var HistoryField = (function(){
+    function HistoryField() {
+        this.display = function() {
+            $("#history").html(this.value);
+        }
+        this.value = "";
+        this.set = function(str) {
+            if (debug) console.log("SET: ", str, ":", this.value);
+            this.value = str;
+            $("#history").html(this.value);
+            //this.display();
+        }
+        this.getValue = function() {
+            return this.value;
+        }
+        this.append = function(token) {
+            if (debug) console.log("APPEND HIST: ", token, ":", this.value);
+            if (root === null) this.clear;
+            this.value += token;
+            $("#history").html(this.value);
+            //this.display();
+        }
+        this.clear = function() {
+            if (debug) console.log("CLEAR HIST: ", this.value);
+            this.value = "";
+            $("#history").html(this.value);
+            //this.display();
+        }
+        this.isClear = function() {
+            if (debug) console.log("HIST IS CLEAR: " + this.value + " === \"\"");
+            return (this.value === "");
+        }
+    }
+    var instance;
+    return {
+        getInstance: function(){
+            if (instance === undefined) {
+                instance = new HistoryField();
+                // Hide the constructor so the returned objected can't be new'd...
+                instance.constructor = null;
+            }
+            return instance;
+        }
+   };
+})();
+
 /*CORE LOGIC*/
 var root = null;
 var curr = null;
-var numToken = "";
+var numToken = NumToken.getInstance();
+var entryField = EntryField.getInstance();
+var historyField = HistoryField.getInstance(); 
 
 /*No validation of input within function itself*/
 function parseDigit(digit) {
-    numToken += digit;
-    return numToken;
+    if (debug) console.log("PARSE DIGIT: " + digit + ":"  + numToken.getValue());
+    numToken.append(digit);
+    return numToken.getValue();
 }
 
 function parseOperator(opToken) {
-    if (numToken === "") return false;
-    var num = new Operand(numToken);
+    if (debug) console.log("PARSE OP: " +  opToken);
+    if (numToken.isEmpty()) return false;
+    var num = new Operand(numToken.getValue());
     var op = new Operator(opToken);
     if (!op) return false;
-    clearNumToken();
-    if (debug) console.log(num.token, op.token);
+    numToken.clear();
+    if (debug) console.log("PARSE OP: " + num.token + ":" +  op.token);
 
+    /*Core node logic */
     if (root === null) {
         curr = op;
         op.setLeft(num);
@@ -101,14 +230,14 @@ function parseOperator(opToken) {
 }
 
 function parseExec() {
-    if (numToken === "") return false;
-    var num = new Operand(numToken);
+    if (numToken.isEmpty()) return false;
+    var num = new Operand(numToken.getValue());
     curr.setRight(num);
     return root;
 }
 
 function parseString(input) {
-    if (debug) console.log("PARSE: " + input);
+    if (debug) console.log("PARSE STRING: " + input);
     resetAST();
     for (var i = 0; i < input.length; i++) {
         var c = input.charAt(i);
@@ -118,34 +247,35 @@ function parseString(input) {
 }
 
 function parseToken(c) {
+    if (debug) console.log("PARSE TOKEN: " + c);
     if (c === "=") {
         if (!isValidOperator() || root === null) return false;
-        updateHistory(numToken + "=");
+        historyField.append(numToken.getValue() + "=");
         parseExec();
         var result = execAST(root);
-        updateHistory(result);
-        displayInput(result);
+        historyField.append(result);
+        entryField.set(result);
         //if (debug) console.log("Result: ", result, ":", printAST(root));
         resetAST(result);
-        if (debug) console.log("RESET: ", c, ":", numToken, ":", root);
-    } else if (c === "ce") {
+        if (debug) console.log("RESET: ", c, ":", numToken.getValue(), ":", root);
+    } else if (c === "ce" || c === "<") {
         clearEntry();
-    } else if (c === "ac") {
+    } else if (c === "ac" || c === ">") {
         allClear();
     } else if (operatorMap[c]) {
         if (!isValidOperator()) return false;
-        updateHistory(numToken + c);
-        displayInput(c);
+        historyField.append(numToken.getValue() + c);
+        entryField.set(c);
         parseOperator(c);
     } else {
-        if (root === null && !isHistoryClear()) {
-            clearHistory();
-            clearInput();
-            clearNumToken();
-        } else if (numToken === "") {
-            clearInput();
+        if (root === null && !historyField.isClear()) {
+            historyField.clear();
+            entryField.clear();
+            numToken.clear();
+        } else if (numToken.isEmpty()) {
+            entryField.clear();
         }
-        updateInput(c);
+        entryField.append(c);
         parseDigit(c);
     }
     return true;
@@ -155,65 +285,59 @@ function clearEntry() {
     //CE Button
     if (debug) console.log("CE");
     if (root === null) {
-        resetAST();
-        clearInput();
-        clearHistory();
-        clearNumToken();
-    } else if (numToken !== "") {
-        clearNumToken();
-        displayInput(curr.token);
+        allClear();
+    } else if (!numToken.isEmpty()) {
+        numToken.clear();
+        entryField.set(curr.token);
     } else {
         if (curr.left instanceof Operand) {
-            numToken = curr.left.token;
+            numToken.setValue(curr.left.token);
             if (debug) console.log("PARENT: ", curr);
             if (curr.parent === null) {
-                resetAST(numToken);
+                resetAST(numToken.getValue());
             } else {
                 curr = curr.parent;
                 if (debug) console.log("CURR: ", curr);
                 curr.setRight(null);
             }
         } else if (curr.left instanceof Operator) {
-            numToken = curr.left.left.token;
+            numToken.setValue(curr.left.right.token);
             if (curr.parent) {
                 curr.parent.setRight(curr.left);
                 curr = curr.left;
             } else {
-                resetAST(curr.left.token);
+                curr = curr.left;
+                curr.parent = null;
+                curr.right = null;
+                root = curr;
             }
         }
-        displayInput(numToken);
-        displayHistory(printAST(root));
+        entryField.set(numToken.getValue());
+        historyField.set(printAST(root));
     }
 }
 
 function allClear() {
     resetAST();
-    clearInput();
-    clearHistory();
-    clearNumToken();
-}
-
-function clearNumToken() {
-    numToken = "";
+    entryField.clear();
+    historyField.clear();
+    numToken.clear();
 }
 
 function resetAST(chainValue) {
     root = null;
     curr = null;
-    parent = null;
-    gParent = null;
 
     if (chainValue !== undefined) {
-        numToken = chainValue.toString();
+        numToken.setValue(chainValue.toString());
     } else {
-        numToken = "";
+        numToken.clear();
     }
 }
 
 function isValidOperator() {
-    console.log("VALIDATE: " + numToken + " !== \"\"");
-    return numToken !== "";
+    console.log("VALIDATE: " + numToken.getValue() + " !== \"\"");
+    return !numToken.isEmpty();
 }
 
 function printAST(node) {
@@ -257,8 +381,8 @@ $(document).ready(function () {
     printTest(printAST(root));
     printTest(execAST(root));*/
     //parseString("55+55*55-55.10=");
-    //updateHistory(printAST(root));
-    //updateHistory(execAST(root));
+    //historyField.append(printAST(root));
+    //historyField.append(execAST(root));
     //$("#searchText").focus();
 });
 
@@ -319,6 +443,7 @@ function setListeners() {
     });
 }
 
+/*
 function displayInput(token) {
     $("#input").html(token);
 }
@@ -340,7 +465,7 @@ function displayHistory(str) {
 function updateHistory(token) {
     var historyDiv = $("#history");
     if (debug) console.log("UPDATE: ", token, ":", historyDiv.text());
-    if (root === null) clearHistory();
+    if (root === null) historyField.clear();
     historyDiv.html(historyDiv.text() + token);
 }
 
@@ -350,6 +475,7 @@ function clearHistory() {
 
 function isHistoryClear() {
     var history = $("#history").html();
-    if (debug) console.log("isHistoryClear: " + history);
+    if (debug) console.log("historyField.isClear(): " + history);
     return  (history === "" || history === undefined);
 }
+*/
