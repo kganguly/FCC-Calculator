@@ -13,18 +13,23 @@ html {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
+    width: 100%;
 }
 
 #calculator {
-    background-color: rgba(50, 50, 50, 0.05);
-    width: 330px;
+    background-color: rgba(50, 50, 250, 0.05);
+    width: 100%;
+    max-width: 330px;
     height: auto;
-    padding: 28px;
+    padding: 20px;
     padding-bottom: 0;
+    margin: auto;
     border-radius: 25px;
-    webkit-box-shadow: 10px 10px 62px 0px rgba(117, 117, 117, 0.96);
-    -moz-box-shadow: 10px 10px 62px 0px rgba(117, 117, 117, 0.96);
-    box-shadow: 10px 10px 62px 0px rgba(117, 117, 117, 0.96);
+    /*webkit-box-shadow: 10px 10px 62px 0px rgba(117, 117, 117, 0.96);
+    //-moz-box-shadow: 10px 10px 62px 0px rgba(117, 117, 117, 0.96);*/
+    box-shadow: 10px 10px 62px 0px rgba(117, 117, 117, 0.96), inset 0px 0px 20px -1px rgba(117, 117, 117, 0.5); //-webkit-box-shadow: inset 2px 2px 43px 0px rgba(117, 117, 117, 0.5);
+    /*-moz-box-shadow: inset 2px 2px 43px 0px rgba(117, 117, 117, 0.5);
+    //box-shadow: inset 2px 2px 43px 0px rgba(117, 117, 117, 0.5);*/
 }
 
 .display {
@@ -38,6 +43,12 @@ html {
     border: 5px solid rgba(96, 71, 6, 0.12);
     border-radius: 10px;
     background-color: rgba(96, 71, 6, 0.02)
+}
+
+.input,
+.history {
+    white-space: nowrap;
+    overflow: hidden;
 }
 
 .input {
@@ -141,4 +152,38 @@ a:hover {
 
 #searchButton:focus {
     outline: none;
+}
+
+@media only screen and (min-width: 360px) {
+    .centeredContainer {
+        min-width: 330px;
+    }
+    #calculator {
+        padding: 28px;
+    }
+}
+
+@media only screen and (min-width: 360px) {
+    .centeredContainer {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: auto;
+        height: auto;
+    }
+    #calculator {
+        background-color: rgba(50, 50, 250, 0.05);
+        max-width: 330px;
+        height: auto;
+        padding: 28px;
+        padding-bottom: 0;
+        border-radius: 25px;
+        /*webkit-box-shadow: 10px 10px 62px 0px rgba(117, 117, 117, 0.96);
+    -moz-box-shadow: 10px 10px 62px 0px rgba(117, 117, 117, 0.96);*/
+        box-shadow: 10px 10px 62px 0px rgba(117, 117, 117, 0.96), inset 0px 0px 20px -1px rgba(117, 117, 117, 0.5);
+        /*-webkit-box-shadow: inset 2px 2px 43px 0px rgba(117, 117, 117, 0.5);
+        /*-moz-box-shadow: inset 2px 2px 43px 0px rgba(117, 117, 117, 0.5);
+    box-shadow: inset 2px 2px 43px 0px rgba(117, 117, 117, 0.5);*/
+    }
 }

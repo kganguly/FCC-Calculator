@@ -1,7 +1,7 @@
 // Karma configuration
 // Generated on Tue Jul 11 2017 18:07:42 GMT-0400 (Eastern Daylight Time)
 
-module.exports = function(config) {
+module.exports = function (config) {
   config.set({
 
     // base path that will be used to resolve all patterns (eg. files, exclude)
@@ -17,33 +17,35 @@ module.exports = function(config) {
     files: [
       'https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js', //include jquery
       'js/**/*.js',
-      'test/**/*.js'      
+      'test/**/*.js'
     ],
 
 
     // list of files to exclude
-    exclude: [
-    ],
+    exclude: [],
 
 
     // preprocess matching files before serving them to the browser
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
     preprocessors: {
+      'js/**/*.js': 'coverage'
     },
 
 
     // test results reporter to use
     // possible values: 'dots', 'progress'
     // available reporters: https://npmjs.org/browse/keyword/karma-reporter
-    reporters: ['progress', 'htmlDetailed'],
+    reporters: ['progress', 'htmlDetailed', 'coverage'],
 
 
     // notify karma of the available plugins
-    plugins: [			   
+    plugins: [
       'karma-jasmine',
       'karma-phantomjs-launcher',
       'karma-chrome-launcher',
-      'karma-html-detailed-reporter'
+      'karma-firefox-launcher',
+      'karma-html-detailed-reporter',
+      'karma-coverage'
     ],
 
 
@@ -72,6 +74,7 @@ module.exports = function(config) {
 
     // start these browsers
     // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
+    //browsers: ['Chrome', 'Firefox']
     browsers: ['Chrome'],
 
 

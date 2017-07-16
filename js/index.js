@@ -62,29 +62,29 @@ Operator.prototype.constructor = Operator;
     * Input: State of calculator input field.
     * History: State of calculator history field.
 */
-var NumToken = (function(){
+var NumToken = (function () {
     function NumToken() {
         this.token = "";
-        this.append = function(c) {
+        this.append = function (c) {
             this.token += c;
         };
-        this.getValue = function() {
+        this.getValue = function () {
             return this.token;
         };
-        this.setValue = function(newValue) {
+        this.setValue = function (newValue) {
             this.token = newValue;
         };
-        this.clear = function() {
+        this.clear = function () {
             this.token = "";
         }
-        this.isEmpty = function() {
+        this.isEmpty = function () {
             return (this.token === "")
         }
-        
+
     }
     var instance;
     return {
-        getInstance: function(){
+        getInstance: function () {
             if (instance === undefined) {
                 instance = new NumToken();
                 // Hide the constructor so the returned objected can't be new'd...
@@ -92,29 +92,29 @@ var NumToken = (function(){
             }
             return instance;
         }
-   };
+    };
 })();
 
-var EntryField = (function(){
+var EntryField = (function () {
     function EntryField() {
         this.value = "";
-        this.display = function(token) {
+        this.display = function (token) {
             $("#input").html(this.value);
-        }        
-        this.set = function(token) {
+        }
+        this.set = function (token) {
             this.value = token;
             $("#input").html(this.value);
             //this.display();
         }
-        this.getValue = function() {
+        this.getValue = function () {
             return this.value;
         }
-        this.append = function(token) {
+        this.append = function (token) {
             this.value += token;
             $("#input").html(this.value);
             //this.display();
         }
-        this.clear = function() {
+        this.clear = function () {
             var initial = "";
             this.value = initial;
             $("#input").html(this.value);
@@ -123,7 +123,7 @@ var EntryField = (function(){
     }
     var instance;
     return {
-        getInstance: function(){
+        getInstance: function () {
             if (instance === undefined) {
                 instance = new EntryField();
                 // Hide the constructor so the returned objected can't be new'd...
@@ -131,45 +131,45 @@ var EntryField = (function(){
             }
             return instance;
         }
-   };
+    };
 })();
 
-var HistoryField = (function(){
+var HistoryField = (function () {
     function HistoryField() {
-        this.display = function() {
+        this.display = function () {
             $("#history").html(this.value);
         }
         this.value = "";
-        this.set = function(str) {
+        this.set = function (str) {
             if (debug) console.log("SET: ", str, ":", this.value);
             this.value = str;
             $("#history").html(this.value);
             //this.display();
         }
-        this.getValue = function() {
+        this.getValue = function () {
             return this.value;
         }
-        this.append = function(token) {
+        this.append = function (token) {
             if (debug) console.log("APPEND HIST: ", token, ":", this.value);
             if (root === null) this.clear;
             this.value += token;
             $("#history").html(this.value);
             //this.display();
         }
-        this.clear = function() {
+        this.clear = function () {
             if (debug) console.log("CLEAR HIST: ", this.value);
             this.value = "";
             $("#history").html(this.value);
             //this.display();
         }
-        this.isClear = function() {
+        this.isClear = function () {
             if (debug) console.log("HIST IS CLEAR: " + this.value + " === \"\"");
             return (this.value === "");
         }
     }
     var instance;
     return {
-        getInstance: function(){
+        getInstance: function () {
             if (instance === undefined) {
                 instance = new HistoryField();
                 // Hide the constructor so the returned objected can't be new'd...
@@ -177,7 +177,7 @@ var HistoryField = (function(){
             }
             return instance;
         }
-   };
+    };
 })();
 
 /*CORE LOGIC*/
@@ -185,23 +185,23 @@ var root = null;
 var curr = null;
 var numToken = NumToken.getInstance();
 var entryField = EntryField.getInstance();
-var historyField = HistoryField.getInstance(); 
+var historyField = HistoryField.getInstance();
 
 /*No validation of input within function itself*/
 function parseDigit(digit) {
-    if (debug) console.log("PARSE DIGIT: " + digit + ":"  + numToken.getValue());
+    if (debug) console.log("PARSE DIGIT: " + digit + ":" + numToken.getValue());
     numToken.append(digit);
     return numToken.getValue();
 }
 
 function parseOperator(opToken) {
-    if (debug) console.log("PARSE OP: " +  opToken);
+    if (debug) console.log("PARSE OP: " + opToken);
     if (numToken.isEmpty()) return false;
     var num = new Operand(numToken.getValue());
     var op = new Operator(opToken);
     if (!op) return false;
     numToken.clear();
-    if (debug) console.log("PARSE OP: " + num.token + ":" +  op.token);
+    if (debug) console.log("PARSE OP: " + num.token + ":" + op.token);
 
     /*Core node logic */
     if (root === null) {
@@ -264,7 +264,8 @@ function parseToken(c) {
         allClear();
     } else if (operatorMap[c]) {
         if (!isValidOperator()) return false;
-        historyField.append(numToken.getValue() + c);
+        if (root === null) historyField.set(numToken.getValue() + c);
+        else historyField.append(numToken.getValue() + c);
         entryField.set(c);
         parseOperator(c);
     } else {
@@ -278,6 +279,8 @@ function parseToken(c) {
         entryField.append(c);
         parseDigit(c);
     }
+    trimRowById("input");
+    trimRowById("history");
     return true;
 }
 
@@ -305,6 +308,7 @@ function clearEntry() {
             if (curr.parent) {
                 curr.parent.setRight(curr.left);
                 curr = curr.left;
+                curr.right = null;
             } else {
                 curr = curr.left;
                 curr.parent = null;
@@ -443,39 +447,19 @@ function setListeners() {
     });
 }
 
-/*
-function displayInput(token) {
-    $("#input").html(token);
-}
+function trimRowById(id) {
+    var row = document.getElementById(id);
+    if (row) {
+        if (debug) console.log("trimRow(" + id + ":" + row.innerHTML + ")", row.scrollWidth, row.offsetWidth);
+        if (row.scrollWidth > row.offsetWidth) {
+            var textNode = row.firstChild;
+            if (debug) console.log("Text Node: " + textNode);
+            var value = '...' + textNode.nodeValue;
+            do {
+                value = '...' + value.substr(4);
+                textNode.nodeValue = value;
 
-function updateInput(token) {
-    var inputDiv = $("#input");
-    inputDiv.html(inputDiv.text() + token);
+            } while (row.scrollWidth > row.offsetWidth);
+        }
+    }
 }
-
-function clearInput() {
-    var initial = "";
-    $("#input").html(initial);
-}
-
-function displayHistory(str) {
-    $("#history").html(str);
-}
-
-function updateHistory(token) {
-    var historyDiv = $("#history");
-    if (debug) console.log("UPDATE: ", token, ":", historyDiv.text());
-    if (root === null) historyField.clear();
-    historyDiv.html(historyDiv.text() + token);
-}
-
-function clearHistory() {
-    $("#history").html("");
-}
-
-function isHistoryClear() {
-    var history = $("#history").html();
-    if (debug) console.log("historyField.isClear(): " + history);
-    return  (history === "" || history === undefined);
-}
-*/
