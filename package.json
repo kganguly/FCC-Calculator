@@ -1,0 +1,38 @@
+{
+  "name": "fcc-calculator",
+  "version": "1.0.0",
+  "description": "FreeCodeCamp Calculator Project",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kganguly/FCC-Calculator.git"
+  },
+  "keywords": [
+    "FCC",
+    "Calculator"
+  ],
+  "author": "Kaushik Ganguly",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kganguly/FCC-Calculator/issues"
+  },
+  "homepage": "https://github.com/kganguly/FCC-Calculator#readme",
+  "devDependencies": {
+    "eslint": "^4.2.0",
+    "gulp": "^3.9.1",
+    "gulp-shell": "^0.6.3",
+    "jasmine": "^2.6.0",
+    "jasmine-core": "^2.6.4",
+    "karma": "1.7.0",
+    "karma-chrome-launcher": "^2.2.0",
+    "karma-coverage": "^1.1.1",
+    "karma-firefox-launcher": "^1.0.1",
+    "karma-html-detailed-reporter": "^1.1.20",
+    "karma-jasmine": "^1.1.0",
+    "karma-phantomjs-launcher": "^1.0.4",
+    "phantomjs": "^2.1.7"
+  }
+}
