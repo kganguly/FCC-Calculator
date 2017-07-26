@@ -1,6 +1,7 @@
 html {
     box-sizing: border-box;
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    background-color: skyblue;
 }
 
 *,
@@ -26,11 +27,10 @@ html {
     padding-bottom: 0;
     margin: auto;
     border-radius: 25px;
-    /*webkit-box-shadow: 10px 10px 62px 0px rgba(117, 117, 117, 0.96);
-    //-moz-box-shadow: 10px 10px 62px 0px rgba(117, 117, 117, 0.96);*/
-    box-shadow: 10px 10px 62px 0px rgba(117, 117, 117, 0.96), inset 0px 0px 20px -1px rgba(117, 117, 117, 0.5); //-webkit-box-shadow: inset 2px 2px 43px 0px rgba(117, 117, 117, 0.5);
-    /*-moz-box-shadow: inset 2px 2px 43px 0px rgba(117, 117, 117, 0.5);
-    //box-shadow: inset 2px 2px 43px 0px rgba(117, 117, 117, 0.5);*/
+    box-shadow: 10px 10px 62px 0px rgba(117, 117, 117, 0.96), inset 0px 0px 20px -1px rgba(117, 117, 117, 0.5);
+    -webkit-box-shadow: 10px 10px 62px 0px rgba(117, 117, 117, 0.96), inset 2px 2px 43px 0px rgba(117, 117, 117, 0.5);
+    -moz-box-shadow: 10px 10px 62px 0px rgba(117, 117, 117, 0.96), inset 2px 2px 43px 0px rgba(117, 117, 117, 0.5);
+    -ms-box-shadow: 10px 10px 62px 0px rgba(117, 117, 117, 0.96), inset 2px 2px 43px 0px rgba(117, 117, 117, 0.5);
 }
 
 .display {
@@ -43,7 +43,7 @@ html {
     text-align: right;
     border: 5px solid rgba(96, 71, 6, 0.12);
     border-radius: 10px;
-    background-color: rgba(96, 71, 6, 0.02)
+    background-color: rgba(96, 71, 6, 0.15)
 }
 
 .input,
